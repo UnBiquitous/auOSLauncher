@@ -1,11 +1,17 @@
 package org.unbiquitous.auoslauncher;
 
+import java.io.File;
 import java.util.ListResourceBundle;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.unbiquitous.driver.execution.ClassToolbox;
+
+import dalvik.system.DexClassLoader;
+
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
@@ -52,6 +58,20 @@ public class LaunchActivity extends Activity {
     		        };
     			}
     		};
+    		
+    		ClassToolbox.platform = new ClassToolbox.Platform() {
+				@Override
+				protected File createTempDir() throws Exception {
+					File writableDir = getApplicationContext().getDir("temp", Context.MODE_WORLD_WRITEABLE);
+					return File.createTempFile("uExeTmp", ""+System.nanoTime(),writableDir);
+				}
+				
+				@Override
+				protected ClassLoader createClassLoader(File input) throws Exception {
+					File folder = input.getParentFile();
+					return new DexClassLoader(input.getPath(),folder.getPath(),null, getClassLoader());
+				}
+			};
     		
     		UOSApplicationContext ctx = new UOSApplicationContext();
     		try {
