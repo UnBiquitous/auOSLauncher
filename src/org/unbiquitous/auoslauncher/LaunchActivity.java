@@ -9,25 +9,25 @@ import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
 import java.lang.reflect.Method;
-import java.util.HashMap;
 import java.util.ListResourceBundle;
 import java.util.Map;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.unbiquitous.driver.execution.executeAgent.ClassToolbox;
 import org.unbiquitous.driver.execution.executeAgent.GatewayMap;
+import org.unbiquitous.uos.core.ClassLoaderUtils;
+import org.unbiquitous.uos.core.ContextException;
+import org.unbiquitous.uos.core.UOSApplicationContext;
+import org.unbiquitous.uos.core.adaptabitilyEngine.Gateway;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
-import br.unb.unbiquitous.ubiquitos.ClassLoaderUtils;
-import br.unb.unbiquitous.ubiquitos.uos.adaptabitilyEngine.Gateway;
-import br.unb.unbiquitous.ubiquitos.uos.context.ContextException;
-import br.unb.unbiquitous.ubiquitos.uos.context.UOSApplicationContext;
 import dalvik.system.DexClassLoader;
 
 public class LaunchActivity extends Activity {
@@ -44,6 +44,12 @@ public class LaunchActivity extends Activity {
 //		logger.log(Level.WARNING,	"This works for warning");
         
 		new StartMiddlewareTask().execute();
+//		propertyList();
+//        Collector collector = new Collector(getApplicationContext(),this);
+//        Map<String, Object> prop = collector.collectData();
+//        for (Object key:prop.keySet()){
+//        	print(prop, key.toString());
+//		}
 //       logger.log(Level.INFO,"java.vm.name:"+System.getProperty("java.vm.name"));
 //        testReadFile();
 //        testLoadAClass("hello_not_class", "org.unbiquitous.driver.spike.HelloNotAgent");
@@ -53,6 +59,24 @@ public class LaunchActivity extends Activity {
 //        testLoadAnObject("hello_not_class","hello_not_obj");
         
     }
+    
+    private static void propertyList(){
+		final Properties properties = System.getProperties();
+		for (Object key:properties.keySet()){
+			printProp(properties, key.toString());
+		}
+	    System.out.print("Total CPU:");
+	    System.out.println(Runtime.getRuntime().availableProcessors());
+	    System.out.println("Max Memory:" + Runtime.getRuntime().maxMemory() + "\n" + "available Memory:" + Runtime.getRuntime().freeMemory());
+	    System.out.println("os.name=" + System.getProperty("os.name"));
+	}
+    
+    private static void print(Map properties, final String prop) {
+		System.out.println(prop+":"+properties.get(prop));
+	}
+    private static void printProp(final Properties properties, final String prop) {
+		System.out.println(prop+":"+properties.getProperty(prop));
+	}
 
     private void testReadFile(){
     	try {
@@ -139,6 +163,10 @@ public class LaunchActivity extends Activity {
 				};
 			};
 			
+			GatewayMap dummy = new GatewayMap(null);
+			dummy.put("context",getApplicationContext()); 
+			dummy.put("activity",this);
+			
     		UOSApplicationContext ctx = new UOSApplicationContext();
     		try {
     			ctx.init(prop);
@@ -146,9 +174,9 @@ public class LaunchActivity extends Activity {
     			logger.log(Level.SEVERE,	"This was severe", e);
     		}
             
-    		testLoadAClass("auos.exe_spiker.apk", 
-    				"org.unbiquitous.driver.execution.spike.HelloFromAndroidAgent",
-    				ctx.getGateway());
+//    		testLoadAClass("auos.exe_spiker.apk", 
+//    				"org.unbiquitous.driver.execution.spike.HelloFromAndroidAgent",
+//    				ctx.getGateway());
     		
     		return null;
         }

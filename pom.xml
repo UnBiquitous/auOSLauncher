@@ -68,6 +68,7 @@
 			<scope>provided</scope>
 		</dependency>
 		
+		
 		<!-- For using log4j on Android
 				https://code.google.com/p/android-logging-log4j/ -->
 		<!--dependency>
