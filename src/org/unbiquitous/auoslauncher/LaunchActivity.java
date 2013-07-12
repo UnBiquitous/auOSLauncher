@@ -16,12 +16,14 @@ import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import org.unbiquitous.driver.execution.ExecutionDriver;
 import org.unbiquitous.driver.execution.executeAgent.ClassToolbox;
 import org.unbiquitous.driver.execution.executeAgent.GatewayMap;
 import org.unbiquitous.uos.core.ClassLoaderUtils;
 import org.unbiquitous.uos.core.ContextException;
-import org.unbiquitous.uos.core.UOSApplicationContext;
+import org.unbiquitous.uos.core.UOS;
 import org.unbiquitous.uos.core.adaptabitilyEngine.Gateway;
+import org.unbiquitous.uos.network.socket.connectionManager.EthernetTCPConnectionManager;
 
 import android.app.Activity;
 import android.content.Context;
@@ -142,15 +144,13 @@ public class LaunchActivity extends Activity {
         	ResourceBundle prop = new ListResourceBundle() {
     			protected Object[][] getContents() {
     				return new Object[][] {
-    					{"ubiquitos.connectionManager", "br.unb.unbiquitous.ubiquitos.network.ethernet.connectionManager.EthernetTCPConnectionManager"},
+    					{"ubiquitos.connectionManager", EthernetTCPConnectionManager.class.getName() },
     					{"ubiquitos.eth.tcp.port", "14984"},
     					{"ubiquitos.eth.tcp.passivePortRange", "14985-15000"},
     					{"ubiquitos.eth.udp.port", "15001"},
     					{"ubiquitos.eth.udp.passivePortRange", "15002-15017"},
     					{"ubiquitos.uos.deviceName", "aUosDevice"}, //TODO: Should not be mandatory, and could be automatic
-    					{"ubiquitos.driver.deploylist", 
-    						"br.unb.unbiquitous.ubiquitos.uos.driver.DeviceDriverImpl;" +
-    						"org.unbiquitous.driver.execution.ExecutionDriver"}, 
+    					{"ubiquitos.driver.deploylist", ExecutionDriver.class.getName()}, 
     		        };
     			}
     		};
@@ -167,7 +167,7 @@ public class LaunchActivity extends Activity {
 			dummy.put("context",getApplicationContext()); 
 			dummy.put("activity",this);
 			
-    		UOSApplicationContext ctx = new UOSApplicationContext();
+    		UOS ctx = new UOS();
     		try {
     			ctx.init(prop);
     		} catch (ContextException e) {
