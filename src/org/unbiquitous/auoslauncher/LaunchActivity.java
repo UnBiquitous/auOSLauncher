@@ -92,7 +92,7 @@ public class LaunchActivity extends Activity {
     
     private void testLoadAClass(String apk_file, String class_name, Gateway gateway){
     	try {
-			setupClassloaderToolbox();
+//			setupClassloaderToolbox();
 			InputStream hello_class = getApplicationContext().getAssets().open(apk_file);
 			
 			ClassToolbox toolbox = new ClassToolbox();
@@ -155,7 +155,7 @@ public class LaunchActivity extends Activity {
     			}
     		};
     		
-    		setupClassloaderToolbox();
+//    		setupClassloaderToolbox();
     		
 			ClassLoaderUtils.builder = new ClassLoaderUtils.DefaultClassLoaderBuilder(){
 				public ClassLoader getParentClassLoader() {
@@ -174,9 +174,9 @@ public class LaunchActivity extends Activity {
     			logger.log(Level.SEVERE,	"This was severe", e);
     		}
             
-//    		testLoadAClass("auos.exe_spiker.apk", 
-//    				"org.unbiquitous.driver.execution.spike.HelloFromAndroidAgent",
-//    				ctx.getGateway());
+    		testLoadAClass("auos.exe_spiker.apk", 
+    				"org.unbiquitous.driver.execution.spike.HelloFromAndroidAgent",
+    				ctx.getGateway());
     		
     		return null;
         }
