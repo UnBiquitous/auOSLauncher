@@ -1,96 +1,159 @@
 package org.unbiquitous.auoslauncher;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectStreamClass;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.util.ListResourceBundle;
 import java.util.Map;
-import java.util.Properties;
-import java.util.ResourceBundle;
-import java.util.logging.Level;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
-import org.unbiquitous.driver.execution.ExecutionDriver;
 import org.unbiquitous.driver.execution.executeAgent.ClassToolbox;
 import org.unbiquitous.driver.execution.executeAgent.GatewayMap;
-import org.unbiquitous.uos.core.ClassLoaderUtils;
-import org.unbiquitous.uos.core.ContextException;
-import org.unbiquitous.uos.core.UOS;
+import org.unbiquitous.uos.core.UOSLogging;
 import org.unbiquitous.uos.core.adaptabitilyEngine.Gateway;
-import org.unbiquitous.uos.network.socket.connectionManager.EthernetTCPConnectionManager;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import dalvik.system.DexClassLoader;
 
 public class LaunchActivity extends Activity {
 	
-	private static final Logger logger = Logger.getLogger(LaunchActivity.class.getName());
+	static final Logger logger = UOSLogging.getLogger();
+	private View.OnClickListener startListener, stopListener;
+	private StartStopMiddlewareTask middlewareTask;
+	private Button startStopButton;
+	private View spinner;
+	private Runnable consoleUpdater;
+	private TextView fakeConsole;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_launch);
-//		logger.log(Level.INFO,		"This works for info");
-//		logger.log(Level.OFF,		"This works off");
-//		logger.log(Level.SEVERE,	"This works severe");
-//		logger.log(Level.WARNING,	"This works for warning");
         
-		new StartMiddlewareTask().execute();
-//		propertyList();
-//        Collector collector = new Collector(getApplicationContext(),this);
-//        Map<String, Object> prop = collector.collectData();
-//        for (Object key:prop.keySet()){
-//        	print(prop, key.toString());
-//		}
-//       logger.log(Level.INFO,"java.vm.name:"+System.getProperty("java.vm.name"));
-//        testReadFile();
-//        testLoadAClass("hello_not_class", "org.unbiquitous.driver.spike.HelloNotAgent");
-//        testLoadAClass("auos.exe_spiker.apk", "org.unbiquitous.driver.execution.spike.HelloFromAndroidAgent");
-//        testLoadAClass("auos.exe_spiker.jar", "org.unbiquitous.driver.execution.spike.HelloFromAndroidAgent");
-        
-//        testLoadAnObject("hello_not_class","hello_not_obj");
-        
+        spinner = LaunchActivity.this.findViewById(R.id.middlewareStartSpinner);
+        setMiddlewareTask();
+		setFakeConsole();
+		setLogger();
     }
-    
-    private static void propertyList(){
-		final Properties properties = System.getProperties();
-		for (Object key:properties.keySet()){
-			printProp(properties, key.toString());
-		}
-	    System.out.print("Total CPU:");
-	    System.out.println(Runtime.getRuntime().availableProcessors());
-	    System.out.println("Max Memory:" + Runtime.getRuntime().maxMemory() + "\n" + "available Memory:" + Runtime.getRuntime().freeMemory());
-	    System.out.println("os.name=" + System.getProperty("os.name"));
-	}
-    
-    private static void print(Map properties, final String prop) {
-		System.out.println(prop+":"+properties.get(prop));
-	}
-    private static void printProp(final Properties properties, final String prop) {
-		System.out.println(prop+":"+properties.getProperty(prop));
+
+	private void setMiddlewareTask() {
+		middlewareTask = new StartStopMiddlewareTask(this);
+        startStopButton = (Button) this.findViewById(R.id.startStopMiddleware);
+        startListener = new View.OnClickListener() {
+			public void onClick(View v) {
+				fakeConsole.setText("");
+				spinner.setVisibility(View.VISIBLE);
+				startStopButton.setVisibility(View.INVISIBLE);
+				middlewareTask.run();
+			}
+		};
+		stopListener = new View.OnClickListener() {
+			public void onClick(View v) {
+				spinner.setVisibility(View.VISIBLE);
+				startStopButton.setVisibility(View.INVISIBLE);
+				middlewareTask.run();
+			}
+		};
+		startStopButton.setOnClickListener(startListener);
 	}
 
-    private void testReadFile(){
-    	try {
-			InputStream raw = getApplicationContext().getAssets().open("teste");
-			BufferedReader is = new BufferedReader(new InputStreamReader(raw, "UTF8"));
-			logger.log(Level.INFO,is.readLine());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	private void setFakeConsole() {
+		fakeConsole = (TextView) LaunchActivity.this.findViewById(R.id.fake_console);
+		fakeConsole.setMovementMethod(ScrollingMovementMethod.getInstance());
+		fakeConsole.setScrollbarFadingEnabled(true);
+		consoleUpdater = new Runnable() {
+			
+			int lineCount(){
+				int count = 1;
+				CharSequence text = fakeConsole.getText();
+				for (int i =0 ; i < text.length(); i ++){
+					if (text.charAt(i) == '\n') count ++;
+				}
+				return count;
+			}
+			
+			public void run() {
+				int totalSize = fakeConsole.getLineHeight()*lineCount();
+				int scrollValue = totalSize - fakeConsole.getHeight();
+				fakeConsole.scrollTo(0, scrollValue);
+			}
+		};
+		fakeConsole.post(consoleUpdater);
+	}
+    
+	private void setLogger() {
+		Formatter logFormatter = new Formatter() {
+			public String format(LogRecord record) {
+				String baseMessage = String.format("%s (%s.%s) :\n %s",
+						record.getLevel(), record.getSourceClassName(),
+						record.getSourceMethodName(), record.getMessage());
+
+				if (record.getThrown() != null) {
+					StringWriter sw = new StringWriter();
+					PrintWriter pw = new PrintWriter(sw);
+					record.getThrown().printStackTrace(pw);
+					baseMessage += sw.toString() + '\n';
+				}
+				return baseMessage;
+			}
+		};
+		Handler logHandler = new Handler() {
+			public void publish(final LogRecord record) {
+				runOnUiThread(new Runnable() {
+					public void run() {
+						final TextView fakeConsole = (TextView) LaunchActivity.this.findViewById(R.id.fake_console);
+						fakeConsole.setText(fakeConsole.getText()+"\n"
+											+getFormatter().format(record));
+						fakeConsole.post(consoleUpdater);
+					}
+				});
+			}
+			
+			public void flush() {}
+			public void close() {}
+		};
+		logHandler.setFormatter(logFormatter);
+		logger.addHandler(logHandler);
+	}
+	
+    public void middlewareStarted(){
+    	runOnUiThread(new Runnable() {
+			public void run() {
+				startStopButton.setOnClickListener(stopListener);
+				spinner.setVisibility(View.INVISIBLE);
+				startStopButton.setText(R.string.stop_middleware);
+				startStopButton.setVisibility(View.VISIBLE);
+			}
+		});
     }
     
-    private void testLoadAClass(String apk_file, String class_name, Gateway gateway){
+    public void middlewareStopped(){
+    	runOnUiThread(new Runnable() {
+			public void run() {
+				startStopButton.setOnClickListener(startListener);
+				startStopButton.setText(R.string.start_middleware);
+				spinner.setVisibility(View.INVISIBLE);
+				startStopButton.setVisibility(View.VISIBLE);
+			}
+		});
+    }
+    
+    void testLoadAClass(String apk_file, String class_name, Gateway gateway){
     	try {
 //			setupClassloaderToolbox();
 			InputStream hello_class = getApplicationContext().getAssets().open(apk_file);
@@ -135,56 +198,6 @@ public class LaunchActivity extends Activity {
 		}
     }
 
-    private class StartMiddlewareTask extends AsyncTask<Void, Void, Void> {
-
-        protected void onPreExecute() { }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-        	ResourceBundle prop = new ListResourceBundle() {
-    			protected Object[][] getContents() {
-    				return new Object[][] {
-    					{"ubiquitos.connectionManager", EthernetTCPConnectionManager.class.getName() },
-    					{"ubiquitos.eth.tcp.port", "14984"},
-    					{"ubiquitos.eth.tcp.passivePortRange", "14985-15000"},
-    					{"ubiquitos.eth.udp.port", "15001"},
-    					{"ubiquitos.eth.udp.passivePortRange", "15002-15017"},
-    					{"ubiquitos.uos.deviceName", "aUosDevice"}, //TODO: Should not be mandatory, and could be automatic
-    					{"ubiquitos.driver.deploylist", ExecutionDriver.class.getName()}, 
-    		        };
-    			}
-    		};
-    		
-//    		setupClassloaderToolbox();
-    		
-			ClassLoaderUtils.builder = new ClassLoaderUtils.DefaultClassLoaderBuilder(){
-				public ClassLoader getParentClassLoader() {
-					return getClassLoader();
-				};
-			};
-			
-			GatewayMap dummy = new GatewayMap(null);
-			dummy.put("context",getApplicationContext()); 
-			dummy.put("activity",this);
-			
-    		UOS ctx = new UOS();
-    		try {
-    			ctx.init(prop);
-    		} catch (ContextException e) {
-    			logger.log(Level.SEVERE,	"This was severe", e);
-    		}
-            
-    		testLoadAClass("auos.exe_spiker.apk", 
-    				"org.unbiquitous.driver.execution.spike.HelloFromAndroidAgent",
-    				ctx.getGateway());
-    		
-    		return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {}
-    }
-    
     private void setupClassloaderToolbox() {
 		ClassToolbox.platform = new ClassToolbox.Platform() {
 			@Override

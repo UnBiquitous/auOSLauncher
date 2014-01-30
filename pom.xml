@@ -35,12 +35,12 @@
 		<dependency>
 		    <groupId>org.unbiquitous</groupId>
 		    <artifactId>uos-core</artifactId>
-		    <version>3.0.0-SNAPSHOT</version>
+		    <version>3.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.unbiquitous</groupId>
 			<artifactId>uos-socket-plugin</artifactId>
-			<version>3.0.0-SNAPSHOT</version>
+			<version>3.1.0-SNAPSHOT</version>
 		</dependency>
 		<!--dependency>
 			<groupId>ubiquitos</groupId>
@@ -52,7 +52,7 @@
 		<dependency>
 			<groupId>org.unbiquitous.driver</groupId>
 			<artifactId>uos-execution</artifactId>
-			<version>1.0-SNAPSHOT</version>
+			<version>1.0-ALPHA</version>
 		</dependency>
 		
 		<dependency>
@@ -82,16 +82,6 @@
 			<version>1.2.14</version>
 		</dependency-->
 
-		<!-- For some unknown reason it doesn't work with it on Android
-				So we remove it -->
-		<dependency>
-			<groupId>ubiquitos</groupId>
-			<artifactId>uos.basic_auth.api</artifactId>
-			<version>2.1.1</version>
-			<type>jar</type>
-			<scope>provided</scope>
-		</dependency>
-		
     </dependencies>
     
     <build>

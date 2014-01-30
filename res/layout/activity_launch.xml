@@ -8,8 +8,44 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="@string/hello_world"
+        android:text="@string/uos_name"
         tools:context=".LaunchActivity" />
+
+    <ImageView
+        android:id="@+id/uosLogoIV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:contentDescription="@string/todo"
+        android:src="@drawable/uos_logo" />
+
+    <Button
+        android:id="@+id/startStopMiddleware"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/hello_msg"
+        android:layout_centerHorizontal="true"
+        android:text="@string/start_middleware" />
+
+    <ProgressBar
+        android:id="@+id/middlewareStartSpinner"
+        style="?android:attr/progressBarStyleLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/startStopMiddleware"
+        android:layout_centerHorizontal="true"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/fake_console"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/middlewareStartSpinner"
+        android:layout_centerHorizontal="true"
+        android:scrollHorizontally="true"
+        android:maxLines="20"
+        android:width="270dp"
+        android:background="#CC000000"
+        />
 
 </RelativeLayout>
