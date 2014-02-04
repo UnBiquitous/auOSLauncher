@@ -14,13 +14,14 @@ import android.os.AsyncTask;
 
 class StartStopMiddlewareTask  {
 
-		private final LaunchActivity launchActivity;
+		private final LaunchActivity mainActivity;
 		private UOS middleware;
 		private ResourceBundle properties;
 		private AsyncTask<Void, Void, Void> task = new StartTask();
 
-		StartStopMiddlewareTask(LaunchActivity launchActivity) {
-			this.launchActivity = launchActivity;
+		StartStopMiddlewareTask(LaunchActivity mainActivity, final String name) {
+			this.mainActivity = mainActivity;
+			
 			properties = new ListResourceBundle() {
     			protected Object[][] getContents() {
     				return new Object[][] {
@@ -30,7 +31,7 @@ class StartStopMiddlewareTask  {
     					{"ubiquitos.eth.tcp.passivePortRange", "14985-15000"},
     					{"ubiquitos.eth.udp.port", "15001"},
     					{"ubiquitos.eth.udp.passivePortRange", "15002-15017"},
-    					{"ubiquitos.uos.deviceName", "aUosDevice"}, //TODO: Should not be mandatory, and could be automatic
+    					{"ubiquitos.uos.deviceName", name}, 
     					{"ubiquitos.driver.deploylist", 
 //    						ExecutionDriver.class.getName()+";"+
     						PrintDriver.class.getName()}, 
@@ -41,7 +42,7 @@ class StartStopMiddlewareTask  {
     		
 			ClassLoaderUtils.builder = new ClassLoaderUtils.DefaultClassLoaderBuilder(){
 				public ClassLoader getParentClassLoader() {
-					return StartStopMiddlewareTask.this.launchActivity.getClassLoader();
+					return StartStopMiddlewareTask.this.mainActivity.getClassLoader();
 				};
 			};
 			
@@ -58,7 +59,7 @@ class StartStopMiddlewareTask  {
         		try {
     				middleware = new UOS();
     				middleware.init(properties);
-    				launchActivity.middlewareStarted();
+    				mainActivity.middlewareStarted();
     				task = new StopTask();
     			} catch (ContextException e) {
     				LaunchActivity.logger.log(Level.SEVERE,	"This was severe", e);
@@ -72,7 +73,7 @@ class StartStopMiddlewareTask  {
         		try {
     				middleware.tearDown();
     				middleware = null;
-    				launchActivity.middlewareStopped();
+    				mainActivity.middlewareStopped();
     				task = new StartTask();
     			} catch (ContextException e) {
     				LaunchActivity.logger.log(Level.SEVERE,	"This was severe", e);

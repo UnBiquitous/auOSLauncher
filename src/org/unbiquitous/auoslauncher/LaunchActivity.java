@@ -21,7 +21,11 @@ import org.unbiquitous.uos.core.UOSLogging;
 import org.unbiquitous.uos.core.adaptabitilyEngine.Gateway;
 
 import android.app.Activity;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
@@ -39,6 +43,7 @@ public class LaunchActivity extends Activity {
 	private View spinner;
 	private Runnable consoleUpdater;
 	private TextView fakeConsole;
+	private String name;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -46,13 +51,23 @@ public class LaunchActivity extends Activity {
         setContentView(R.layout.activity_launch);
         
         spinner = LaunchActivity.this.findViewById(R.id.middlewareStartSpinner);
+        
+        setName();
         setMiddlewareTask();
 		setFakeConsole();
 		setLogger();
     }
 
+	private void setName() {
+		name = new NameBuilder(this).getName();
+        TextView title = (TextView) findViewById(R.id.title);
+		title.setText(name);
+	}
+    
+    
+
 	private void setMiddlewareTask() {
-		middlewareTask = new StartStopMiddlewareTask(this);
+		middlewareTask = new StartStopMiddlewareTask(this,name);
         startStopButton = (Button) this.findViewById(R.id.startStopMiddleware);
         startListener = new View.OnClickListener() {
 			public void onClick(View v) {
