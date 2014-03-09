@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
+import org.unbiquitous.uos.core.InitialProperties;
 import org.unbiquitous.uos.core.adaptabitilyEngine.Gateway;
 import org.unbiquitous.uos.core.adaptabitilyEngine.NotifyException;
 import org.unbiquitous.uos.core.applicationManager.CallContext;
@@ -32,7 +33,7 @@ public class PrintDriver implements UosEventDriver{
 		return null;
 	}
 
-	public void init(final Gateway gateway, String instanceId) {
+	public void init(final Gateway gateway, InitialProperties properties, String instanceId) {
 		new Thread(new Runnable() {
 			public void run() {
 				while(true){
@@ -76,7 +77,7 @@ public class PrintDriver implements UosEventDriver{
 
 	public void registerListener(Call serviceCall,
 			Response serviceResponse, CallContext messageContext) {
-		NetworkDevice callerDevice = messageContext.getCallerDevice();
+		NetworkDevice callerDevice = messageContext.getCallerNetworkDevice();
 		UpDevice d = new UpDevice("DummyGuy")
 			.addNetworkInterface(
 					callerDevice.getNetworkDeviceName(), 
