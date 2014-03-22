@@ -60,7 +60,7 @@ public class PrintDriver implements UosEventDriver{
 			event.addParameter("text", text);
 			try {
 				for(UpDevice device : devices){
-					gateway.sendEventNotify(event,device);
+					gateway.notify(event,device);
 				}
 			} catch (NotifyException e) {
 				throw new RuntimeException(e);
@@ -71,8 +71,13 @@ public class PrintDriver implements UosEventDriver{
 
 	public void destroy() {}
 
-	public void print(Call call, Response response, CallContext object) {
-		System.out.println(call.getParameterString("text"));
+	public void print(Call call, Response response, CallContext ctx) {
+		String message = call.getParameterString("text");
+		if (ctx.getCallerDevice() != null){
+			message = String.format("%s: %s", ctx.getCallerDevice().getName(), 
+									message);
+		}
+		System.out.println(message);
 	}
 
 	public void registerListener(Call serviceCall,
