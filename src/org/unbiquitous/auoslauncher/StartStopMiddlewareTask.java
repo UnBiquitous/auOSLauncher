@@ -11,6 +11,8 @@ import org.unbiquitous.uos.core.UOSLogging;
 import org.unbiquitous.uos.network.socket.connectionManager.TCPConnectionManager;
 import org.unbiquitous.uos.network.socket.radar.MulticastRadar;
 
+import android.content.Context;
+import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 
 class StartStopMiddlewareTask  {
@@ -59,6 +61,10 @@ class StartStopMiddlewareTask  {
         class StartTask extends AsyncTask<Void, Void, Void>{
         	protected Void doInBackground(Void... params) {
         		try {
+        			WifiManager wm = (WifiManager)mainActivity.getSystemService(Context.WIFI_SERVICE);
+        			WifiManager.MulticastLock multicastLock = wm.createMulticastLock("mydebuginfo");
+        			multicastLock.acquire();
+        			
     				middleware = new UOS();
     				middleware.init(properties);
     				mainActivity.middlewareStarted();

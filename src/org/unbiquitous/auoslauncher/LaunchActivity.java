@@ -9,6 +9,7 @@ import java.io.ObjectStreamClass;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
@@ -17,6 +18,10 @@ import java.util.logging.Logger;
 
 import org.unbiquitous.driver.execution.executeAgent.ClassToolbox;
 import org.unbiquitous.driver.execution.executeAgent.GatewayMap;
+import org.unbiquitous.uImpala.dalvik.impl.core.Game;
+import org.unbiquitous.uImpala.engine.core.GameSettings;
+import org.unbiquitous.uImpala.engine.io.MouseManager;
+import org.unbiquitous.uImpala.engine.io.ScreenManager;
 import org.unbiquitous.uos.core.UOSLogging;
 import org.unbiquitous.uos.core.adaptabitilyEngine.Gateway;
 
@@ -44,7 +49,23 @@ public class LaunchActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_launch);
+//        runMiddlewareDebugger();
+        runGameDebugger();
+    }
+
+    private void runGameDebugger(){
+    	Game.run(new GameSettings() {
+			{ // TODO: Game Settings could have helper methods
+				put("main_activity", LaunchActivity.this);
+				put("first_scene", GameMenu.class);
+				put("input_managers", Arrays.asList(MouseManager.class));
+				put("output_managers", Arrays.asList(ScreenManager.class));
+			}
+		});
+    }
+    
+	private void runMiddlewareDebugger() {
+		setContentView(R.layout.activity_launch);
         
         spinner = LaunchActivity.this.findViewById(R.id.middlewareStartSpinner);
         
@@ -52,7 +73,7 @@ public class LaunchActivity extends Activity {
         setMiddlewareTask();
 		setFakeConsole();
 		setLogger();
-    }
+	}
 
 	private void setName() {
 		name = new NameBuilder(this).getName();
