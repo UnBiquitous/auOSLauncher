@@ -3,6 +3,7 @@ package org.unbiquitous.auoslauncher;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.Date;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -11,6 +12,8 @@ import org.unbiquitous.uImpala.engine.core.GameScene;
 import org.unbiquitous.uImpala.engine.io.Screen;
 import org.unbiquitous.uImpala.engine.io.ScreenManager;
 
+import android.util.Log;
+
 public class GameMenu extends GameScene {
 
 	Screen localScreen;
@@ -18,9 +21,12 @@ public class GameMenu extends GameScene {
 	public GameMenu() {
 		localScreen = GameComponents.get(ScreenManager.class).create();
 		localScreen.open(null, 0, 0, true, null);
+		GameComponents.put(Screen.class, localScreen);
+		start = new Date(); 
 	}
 
 	long count = 0;
+	private Date start;
 	public void render() {
 		GL10 gl = GameComponents.get(GL10.class);
 		
@@ -38,7 +44,14 @@ public class GameMenu extends GameScene {
 
 	protected void update() {
 		count ++;
-		System.out.println("Count "+count);
+//		System.out.println("Count "+count);
+		Date now = new Date();
+		if (now.getTime() - start.getTime() > 30*1000){
+			GameComponents.get(org.unbiquitous.uImpala.engine.core.Game.class).change(new RedSquareScene());
+		}else{
+			Log.i("debug", "not yet" + 
+					localScreen.getMouse().getX()+","+localScreen.getMouse().getY());
+		}
 	}
 
 	protected void wakeup(Object... arg0) {
