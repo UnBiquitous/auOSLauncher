@@ -13,15 +13,18 @@ import java.util.Arrays;
 import java.util.Map;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import org.unbiquitous.driver.execution.executeAgent.ClassToolbox;
 import org.unbiquitous.driver.execution.executeAgent.GatewayMap;
 import org.unbiquitous.uImpala.dalvik.impl.core.Game;
+import org.unbiquitous.uImpala.engine.core.GameComponents;
 import org.unbiquitous.uImpala.engine.core.GameSettings;
 import org.unbiquitous.uImpala.engine.io.MouseManager;
 import org.unbiquitous.uImpala.engine.io.ScreenManager;
+import org.unbiquitous.uos.core.ClassLoaderUtils;
 import org.unbiquitous.uos.core.UOSLogging;
 import org.unbiquitous.uos.core.adaptabitilyEngine.Gateway;
 
@@ -31,6 +34,8 @@ import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.view.Menu;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 import dalvik.system.DexClassLoader;
@@ -49,11 +54,34 @@ public class LaunchActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        UOSLogging.setLevel(Level.FINE);
 //        runMiddlewareDebugger();
         runGameDebugger();
     }
-
+    
+    @Override
+    protected void onResume() {
+    	// TODO Auto-generated method stub : mGLView.onResume
+    	super.onResume();
+    }
+    
+    protected void onPause() {
+    	// TODO Auto-generated method stub: mGLView.onPause
+    	super.onPause();
+    }
+    
     private void runGameDebugger(){
+    	this.requestWindowFeature(Window.FEATURE_NO_TITLE); // (NEW)
+    	this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN); // (NEW)
+    	
+    	GameComponents.get(Class.class); // Force everybody to be on the same Thread Tree
+    	
+    	ClassLoaderUtils.builder = new ClassLoaderUtils.DefaultClassLoaderBuilder(){
+			public ClassLoader getParentClassLoader() {
+				return LaunchActivity.this.getClassLoader();
+			};
+		};
     	Game.run(new GameSettings() {
 			{ // TODO: Game Settings could have helper methods
 				put("main_activity", LaunchActivity.this);
