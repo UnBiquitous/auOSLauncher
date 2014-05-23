@@ -19,6 +19,7 @@ import java.util.logging.Logger;
 
 import org.unbiquitous.driver.execution.executeAgent.ClassToolbox;
 import org.unbiquitous.driver.execution.executeAgent.GatewayMap;
+import org.unbiquitous.uImpala.dalvik.GameActivity;
 import org.unbiquitous.uImpala.dalvik.impl.core.Game;
 import org.unbiquitous.uImpala.engine.core.GameComponents;
 import org.unbiquitous.uImpala.engine.core.GameSettings;
@@ -40,7 +41,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import dalvik.system.DexClassLoader;
 
-public class LaunchActivity extends Activity {
+public class LaunchActivity extends GameActivity {
 	
 	static final Logger logger = UOSLogging.getLogger();
 	private View.OnClickListener startListener, stopListener;
@@ -59,30 +60,8 @@ public class LaunchActivity extends Activity {
         runGameDebugger();
     }
     
-    @Override
-    protected void onResume() {
-    	// TODO Auto-generated method stub : mGLView.onResume
-    	super.onResume();
-    }
-    
-    protected void onPause() {
-    	// TODO Auto-generated method stub: mGLView.onPause
-    	super.onPause();
-    }
-    
     private void runGameDebugger(){
-    	this.requestWindowFeature(Window.FEATURE_NO_TITLE); // (NEW)
-    	this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-            WindowManager.LayoutParams.FLAG_FULLSCREEN); // (NEW)
-    	
-    	GameComponents.get(Class.class); // Force everybody to be on the same Thread Tree
-    	
-    	ClassLoaderUtils.builder = new ClassLoaderUtils.DefaultClassLoaderBuilder(){
-			public ClassLoader getParentClassLoader() {
-				return LaunchActivity.this.getClassLoader();
-			};
-		};
-    	Game.run(new GameSettings() {
+    	run(new GameSettings() {
 			{ // TODO: Game Settings could have helper methods
 				put("main_activity", LaunchActivity.this);
 				put("first_scene", GameMenu.class);
