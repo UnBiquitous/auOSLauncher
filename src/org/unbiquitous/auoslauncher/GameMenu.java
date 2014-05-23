@@ -20,7 +20,7 @@ public class GameMenu extends GameScene {
 
 	public GameMenu() {
 		localScreen = GameComponents.get(ScreenManager.class).create();
-		localScreen.open(null, 0, 0, true, null);
+		localScreen.open();
 		GameComponents.put(Screen.class, localScreen);
 		start = new Date(); 
 	}
@@ -46,7 +46,7 @@ public class GameMenu extends GameScene {
 		count ++;
 //		System.out.println("Count "+count);
 		Date now = new Date();
-		if (now.getTime() - start.getTime() > 30*1000){
+		if (now.getTime() - start.getTime() > 15*1000){
 			GameComponents.get(org.unbiquitous.uImpala.engine.core.Game.class).change(new RedSquareScene());
 		}else{
 			Log.i("debug", "not yet" + 
